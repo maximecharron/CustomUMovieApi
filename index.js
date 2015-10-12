@@ -125,5 +125,5 @@ app.delete('/unsecure/watchlists/:id/movies/:trackId', watchlist.removeMovieFrom
 app.put('/unsecure/watchlists/:id', watchlist.updateWatchlist);
 app.delete('/unsecure/watchlists/:id', watchlist.removeWatchlistUnsecure);
 
-var port = 3000;
+var port = process.env.PORT || 3000;
 app.listen(port);
