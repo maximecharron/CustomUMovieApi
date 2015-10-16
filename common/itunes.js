@@ -14,7 +14,7 @@ exports.search = function (parameters, res) {
     if (parameters.entity == "movieArtist") {
         queryItunesApiForActor(searchEndPoint + qs.stringify(parameters), res);
     } else {
-        queryItunesApi(searchEndPoint + qs.stringify(parameters), res);
+        queryItunesApi(searchEndPoint + qs.stringify(parameters), res, parameters.entity);
     }
 };
 
@@ -22,20 +22,20 @@ exports.lookup = function (parameters, res, amount) {
     if (parameters.entity == "movieArtist") {
         queryItunesApiForActor(lookupEndPoint + qs.stringify(parameters), res, amount);
     } else {
-        queryItunesApi(lookupEndPoint + qs.stringify(parameters), res, amount);
+        queryItunesApi(lookupEndPoint + qs.stringify(parameters), res, amount, parameters.entity);
     }
 
 };
 
 
-function queryItunesApi(url, res, amount) {
+function queryItunesApi(url, res, amount, type) {
     request({
             uri: url,
             method: 'GET'
         },
         function (error, response, body) {
             if (!error && response.statusCode === 200) {
-                successItunesCallback(res, JSON.parse(body), amount);
+                successItunesCallback(res, JSON.parse(body), amount, type);
             } else {
                 errorCallback(res, error, response, body);
             }
@@ -70,24 +70,103 @@ function successItunesActorCallback(res, body, amount) {
     }
 }
 
-function successItunesCallback(res, body, amount) {
+function successItunesCallback(res, body, amount, type) {
     var results;
     if (amount == 'many') {
         body.results.splice(0, 1);
         body.resultCount--;
         callYoutube(res, body);
     }
+    else if (amount == 'single') {
+        getVideoAndReviews(res, body, type);
+    }
     else {
         callYoutube(res, body);
     }
 }
 
+function getVideoAndReviews(res, body, type) {
+    var results = body.results
+    async.forEachOf(results, function (result, iterator, successYoutubeCallback) {
+        var urlSearch;
+        var baseUrlLookup;
+        if (type.contains('tv')){
+            urlSearch = omdbEndPoint + "search/tv?" + qs.stringify({
+                    query: results[iterator].artistName,
+                    api_key: omdbApiKey
+                });
+            baseUrlLookup = omdbEndPoint + "tv/";
+        }else{
+            urlSearch = omdbEndPoint + "search/movie?" + qs.stringify({
+                    query: results[iterator].trackName,
+                    api_key: omdbApiKey
+                });
+            baseUrlLookup = omdbEndPoint + "movie/";
+        }
+
+        var id;
+        async.parallel([
+                async.waterfall([function (successSearchCallback) {
+                    request({
+                            uri: urlSearch,
+                            method: 'GET'
+                        },
+                        function (error, response, body) {
+                            if (!error && response.statusCode === 200) {
+                                id = JSON.parse(body).results[0].id;
+                            } else {
+                                console.log("Failed to get data for " + result.trackName);
+                            }
+                            successSearchCallback(null);
+                        }
+                    );
+                }, function (successSingleCallback) {
+                    request({
+                            uri: baseUrlLookup + id + "?" + qs.stringify({api_key: omdbApiKey}),
+                            method: 'GET'
+                        },
+                        function (error, response, body) {
+                            if (!error && response.statusCode === 200) {
+                                //TODO: Parse result
+                            } else {
+                                console.log("Failed to get movie/tvshow for " + result.trackName);
+                                console.log(response);
+                            }
+                            successSingleCallback(null);
+                        }
+                    );
+                }]),
+                function(successReviewsCallback){
+                    if (type == 'movie'){
+                        baseUrlLookup = baseUrlLookup +id+"/reviews"
+                    } else if (type == 'tvSeason'){
+                        baseUrlLookup = baseUrlLookup +id+"/reviews"
+                    } else {
+
+                    }
+                    request({
+                        uri: omdbEndPoint + "person/" + id + "?" + qs.stringify({api_key: omdbApiKey}),
+                        method: 'GET'
+                    })
+                }
+            ]
+            , successYoutubeCallback
+        )
+    }, function (error) {
+        body.results = results;
+        res.status(200).send(body);
+    })
+}
+
 function callOMDB(res, body) {
     var results = body.results
     async.forEachOf(results, function (result, iterator, successYoutubeCallback) {
-        var urlSearch = omdbEndPoint + "search/person?" + qs.stringify({query: results[iterator].artistName, api_key: omdbApiKey});
+        var urlSearch = omdbEndPoint + "search/person?" + qs.stringify({
+                query: results[iterator].artistName,
+                api_key: omdbApiKey
+            });
         var id;
-        async.waterfall( [function(successSearchCallback){
+        async.waterfall([function (successSearchCallback) {
                 request({
                         uri: urlSearch,
                         method: 'GET'
@@ -101,9 +180,9 @@ function callOMDB(res, body) {
                         successSearchCallback(null);
                     }
                 );
-            }, function(successSingleCallback){
+            }, function (successSingleCallback) {
                 request({
-                        uri: omdbEndPoint+"person/"+id+"?"+qs.stringify({api_key: omdbApiKey}),
+                        uri: omdbEndPoint + "person/" + id + "?" + qs.stringify({api_key: omdbApiKey}),
                         method: 'GET'
                     },
                     function (error, response, body) {
@@ -121,7 +200,7 @@ function callOMDB(res, body) {
                     }
                 );
             }]
-            ,successYoutubeCallback
+            , successYoutubeCallback
         )
     }, function (error) {
         body.results = results;
