@@ -62,7 +62,7 @@ function queryItunesApiForActor(url, res, amount) {
 }
 function queryOmdbPopular(res, type) {
     var urlPopular;
-    if (type = "tv") {
+    if (type == "tv") {
         urlPopular = omdbEndPoint + "tv/popular?" + qs.stringify({
                 api_key: omdbApiKey
             })
