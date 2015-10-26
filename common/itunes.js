@@ -83,11 +83,14 @@ function successItunesCallback(res, body, amount) {
 }
 
 function callOMDB(res, body) {
-    var results = body.results
+    var results = body.results;
     async.forEachOf(results, function (result, iterator, successYoutubeCallback) {
-        var urlSearch = omdbEndPoint + "search/person?" + qs.stringify({query: results[iterator].artistName, api_key: omdbApiKey});
+        var urlSearch = omdbEndPoint + "search/person?" + qs.stringify({
+                query: results[iterator].artistName,
+                api_key: omdbApiKey
+            });
         var id;
-        async.waterfall( [function(successSearchCallback){
+        async.waterfall([function (successSearchCallback) {
                 request({
                         uri: urlSearch,
                         method: 'GET'
@@ -101,9 +104,9 @@ function callOMDB(res, body) {
                         successSearchCallback(null);
                     }
                 );
-            }, function(successSingleCallback){
+            }, function (successSingleCallback) {
                 request({
-                        uri: omdbEndPoint+"person/"+id+"?"+qs.stringify({api_key: omdbApiKey}),
+                        uri: omdbEndPoint + "person/" + id + "?" + qs.stringify({api_key: omdbApiKey}),
                         method: 'GET'
                     },
                     function (error, response, body) {
@@ -121,7 +124,7 @@ function callOMDB(res, body) {
                     }
                 );
             }]
-            ,successYoutubeCallback
+            , successYoutubeCallback
         )
     }, function (error) {
         body.results = results;
@@ -132,7 +135,12 @@ function callOMDB(res, body) {
 function callYoutube(res, body) {
     var results = body.results
     async.forEachOf(results, function (result, iterator, successYoutubeCallback) {
-        var url = youtubeEndPoint + qs.stringify({q: results[iterator].trackName + " Trailer", key: youtubeKey});
+        var url;
+        if (results[iterator].trackName !== undefined) {
+            url = youtubeEndPoint + qs.stringify({q: results[iterator].trackName + " Trailer", key: youtubeKey});
+        } else {
+            url = youtubeEndPoint + qs.stringify({q: results[iterator].collectionName + " Trailer", key: youtubeKey});
+        }
         request({
                 uri: url,
                 method: 'GET'
