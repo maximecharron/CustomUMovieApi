@@ -11,12 +11,19 @@ var omdbApiKey = '7ff441f342ce66026152b06ccc348229';
 var imageEndPoint = 'http://image.tmdb.org/t/p/w500';
 
 exports.search = function (parameters, res) {
-    queryItunesApi(searchEndPoint + qs.stringify(parameters), res, parameters.entity, "search");
+    if (parameters.entity == "movieArtist") {
+        queryItunesApiForActor(searchEndPoint + qs.stringify(parameters), res);
+    } else {
+        queryItunesApi(searchEndPoint + qs.stringify(parameters), res);
+    }
 };
 
 exports.lookup = function (parameters, res, amount) {
-    queryItunesApi(lookupEndPoint + qs.stringify(parameters), res, parameters.entity, "lookup", amount);
-
+    if (parameters.entity == "movieArtist") {
+        queryItunesApiForActor(lookupEndPoint + qs.stringify(parameters), res, amount);
+    } else {
+        queryItunesApi(lookupEndPoint + qs.stringify(parameters), res, amount);
+    }
 };
 
 exports.popular = function (res, type) {
@@ -24,6 +31,35 @@ exports.popular = function (res, type) {
 };
 
 
+function queryItunesApi(url, res, amount) {
+    request({
+            uri: url,
+            method: 'GET'
+        },
+        function (error, response, body) {
+            if (!error && response.statusCode === 200) {
+                successItunesCallback(res, JSON.parse(body), amount);
+            } else {
+                errorCallback(res, error, response, body);
+            }
+        }
+    );
+}
+
+function queryItunesApiForActor(url, res, amount) {
+    request({
+            uri: url,
+            method: 'GET'
+        },
+        function (error, response, body) {
+            if (!error && response.statusCode === 200) {
+                successItunesActorCallback(res, JSON.parse(body), amount);
+            } else {
+                errorCallback(res, error, response, body);
+            }
+        }
+    );
+}
 function queryOmdbPopular(res, type) {
     var urlPopular;
     if (type = "tv") {
@@ -97,44 +133,27 @@ function queryOmdbPopular(res, type) {
     }])
 }
 
-function queryItunesApi(url, res, parameters, type, amount) {
-    request({
-            uri: url,
-            method: 'GET'
-        },
-        function (error, response, body) {
-            if (!error && response.statusCode === 200) {
-                successItunesCallback(res, JSON.parse(body), parameters, type, amount);
-            } else {
-                errorCallback(res, error, response, body);
-            }
-        }
-    );
-}
-
-function successItunesCallback(res, body, entity, type, amount) {
+function successItunesActorCallback(res, body, amount) {
     var results;
     if (amount == 'many') {
         body.results.splice(0, 1);
         body.resultCount--;
-        if (type == "lookup") {
-            callOMDB(res, body, type)
-        } else {
-            callYoutube(res, body);
-        }
+        callOMDB(res, body);
     }
     else {
-        if (type == "lookup") {
-            if (entity == "movieArtist") {
+        callOMDB(res, body);
+    }
+}
 
-            } else if (entity == "tvEpisode") {
-
-            } else if (entity == "movie") {
-
-            }
-        } else {
-            callYoutube(res, body);
-        }
+function successItunesCallback(res, body, amount) {
+    var results;
+    if (amount == 'many') {
+        body.results.splice(0, 1);
+        body.resultCount--;
+        callYoutube(res, body);
+    }
+    else {
+        callYoutube(res, body);
     }
 }
 
@@ -193,7 +212,10 @@ function callYoutube(res, body) {
     async.forEachOf(results, function (result, iterator, successYoutubeCallback) {
         var url;
         if (results[iterator].trackName !== undefined) {
-            url = youtubeEndPoint + qs.stringify({q: results[iterator].trackName + " Trailer", key: youtubeKey});
+            url = youtubeEndPoint + qs.stringify({
+                    q: results[iterator].trackName + " Trailer",
+                    key: youtubeKey
+                });
         } else {
             url = youtubeEndPoint + qs.stringify({
                     q: results[iterator].collectionName + " Trailer",
