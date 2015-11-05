@@ -20,6 +20,7 @@ var signup = require('./routes/signup');
 var status = require('./routes/status');
 var user = require('./routes/user');
 var watchlist = require('./routes/watchlists');
+var scraper = require('./common/scraper.js');
 
 var app = express();
 var corsOptions = {
@@ -48,6 +49,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 app.use(cors(corsOptions));
+
+app.get('/scrape', scraper.scrape);
 
 app.get('/status', status.getStatus);
 app.get('/login', login.showLoginPage);

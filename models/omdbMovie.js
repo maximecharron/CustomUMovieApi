@@ -2,7 +2,11 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var modelHelpers = require('./modelHelpers.js');
 
-var movieSchema = new Schema({}, {strict:false});
+var movieSchema = new Schema({
+    _id: Number,
+    title: String,
+    otherData: Object
+}, {strict:false});
 
 movieSchema.method('toJSON', modelHelpers.toJSON);
 
