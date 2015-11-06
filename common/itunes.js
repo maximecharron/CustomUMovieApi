@@ -138,10 +138,10 @@ function successItunesActorCallback(res, body, amount) {
     if (amount == 'many') {
         body.results.splice(0, 1);
         body.resultCount--;
-        callOMDB(res, body);
+        callOMDBActor(res, body);
     }
     else {
-        callOMDB(res, body);
+        callOMDBActor(res, body);
     }
 }
 
@@ -157,7 +157,7 @@ function successItunesCallback(res, body, amount) {
     }
 }
 
-function callOMDBActor(res, body, type) {
+function callOMDBActor(res, body) {
     var results = body.results || body;
     async.forEachOf(results, function (result, iterator, successYoutubeCallback) {
         var urlSearch = omdbEndPoint + "search/person?" + qs.stringify({
