@@ -1,3 +1,4 @@
+require('newrelic');
 var express = require('express');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
@@ -21,6 +22,7 @@ var status = require('./routes/status');
 var user = require('./routes/user');
 var watchlist = require('./routes/watchlists');
 var scraper = require('./common/scraper.js');
+var home = require('./routes/home');
 
 var app = express();
 var corsOptions = {
@@ -119,6 +121,8 @@ app.get('/unsecure/actors/:id/movies', lookup.getActorMovies);
 app.get('/unsecure/movies/:id', lookup.getMovie);
 app.get('/unsecure/tvshows/season/:id', lookup.getTvShowSeason);
 app.get('/unsecure/tvshows/season/:id/episodes', lookup.getTvShowEpisodes);
+app.get('/unsecure/popular/movies', home.getPopularMovies);
+app.get('/unsecure/popular/tvshows', home.getPopularTvShows);
 
 app.get('/unsecure/watchlists', watchlist.getWatchlists);
 app.post('/unsecure/watchlists', watchlist.createWatchlistUnsecure);
