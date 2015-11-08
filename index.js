@@ -52,7 +52,8 @@ app.use(passport.session());
 app.use(flash());
 app.use(cors(corsOptions));
 
-app.get('/scrape', scraper.scrape);
+app.get('/scrape/movies', scraper.scrapeMovies);
+appéget('/scrape/tvshows', scraper.scrapeTvShows);
 
 app.get('/status', status.getStatus);
 app.get('/login', login.showLoginPage);
