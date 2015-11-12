@@ -34,3 +34,10 @@ exports.getTvShowEpisodes = function (req, res) {
         entity: 'tvEpisode'
     }, res, 'many');
 };
+
+exports.getMovieReviews = function(req, res){
+    itunes.reviews({
+        id: req.params.id,
+        type: 'movie'
+    }, res);
+};

@@ -53,7 +53,7 @@ app.use(flash());
 app.use(cors(corsOptions));
 
 app.get('/scrape/movies', scraper.scrapeMovies);
-appéget('/scrape/tvshows', scraper.scrapeTvShows);
+app.get('/scrape/tvshows', scraper.scrapeTvShows);
 
 app.get('/status', status.getStatus);
 app.get('/login', login.showLoginPage);
@@ -88,6 +88,7 @@ app.delete('/follow/:id', authentication.isAuthenticated, user.unfollow);
 app.get('/actors/:id', authentication.isAuthenticated, lookup.getActor);
 app.get('/actors/:id/movies', authentication.isAuthenticated, lookup.getActorMovies);
 app.get('/movies/:id', authentication.isAuthenticated, lookup.getMovie);
+app.get('/movies/:id/reviews', authentication.isAuthenticated, lookup.getMovieReviews);
 app.get('/tvshows/season/:id', authentication.isAuthenticated, lookup.getTvShowSeason);
 app.get('/tvshows/season/:id/episodes', authentication.isAuthenticated, lookup.getTvShowEpisodes);
 
@@ -120,6 +121,7 @@ app.delete('/unsecure/follow/:id', user.unfollow);
 app.get('/unsecure/actors/:id', lookup.getActor);
 app.get('/unsecure/actors/:id/movies', lookup.getActorMovies);
 app.get('/unsecure/movies/:id', lookup.getMovie);
+app.get('/unsecure/movies/:id/reviews', lookup.getMovieReviews);
 app.get('/unsecure/tvshows/season/:id', lookup.getTvShowSeason);
 app.get('/unsecure/tvshows/season/:id/episodes', lookup.getTvShowEpisodes);
 app.get('/unsecure/popular/movies', home.getPopularMovies);

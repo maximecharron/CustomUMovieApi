@@ -18,6 +18,10 @@ exports.search = function (parameters, res) {
     }
 };
 
+exports.reviews = function (parameters, res) {
+    getMovieReviews(res, parameters.id, parameters.type);
+};
+
 exports.lookup = function (parameters, res, amount) {
     if (parameters.entity == "movieArtist") {
         queryItunesApiForActor(lookupEndPoint + qs.stringify(parameters), res, amount);
@@ -31,6 +35,24 @@ exports.popular = function (res, type) {
 };
 
 
+function getMovieReviews(res, id, type) {
+    var url = omdbEndPoint + "movies/" + id + "/reviews?" + qs.stringify({
+            api_key: omdbApiKey
+        });
+    request({
+            uri: url,
+            method: 'GET'
+        },
+        function (error, response, body) {
+            if (!error && response.statusCode === 200) {
+                successCallback(res, JSON.parse(body));
+            } else {
+                errorCallback(res, error, response, body);
+            }
+        }
+    );
+}
+
 function queryItunesApi(url, res, amount, type) {
     request({
             uri: url,
@@ -39,6 +61,7 @@ function queryItunesApi(url, res, amount, type) {
         function (error, response, body) {
             if (!error && response.statusCode === 200) {
                 successItunesCallback(res, JSON.parse(body), amount, type);
+                console.log(url);
             } else {
                 errorCallback(res, error, response, body);
             }
@@ -54,6 +77,7 @@ function queryItunesApiForActor(url, res, amount) {
         function (error, response, body) {
             if (!error && response.statusCode === 200) {
                 successItunesActorCallback(res, JSON.parse(body), amount);
+                console.log(url);
             } else {
                 errorCallback(res, error, response, body);
             }
@@ -241,6 +265,9 @@ function callYoutube(res, body) {
     })
 }
 
+function successCallback(res, body) {
+    res.status(200).send(body.results);
+}
 
 function errorCallback(res, error, response, body) {
     console.error(error, body);

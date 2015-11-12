@@ -8,7 +8,7 @@ var OMDBTvShow = require('../models/omdbTvShow').model;
 var OMDBSeason = require('../models/omdbSeason').model;
 
 var scrapeMovies = function (i) {
-    if (i >= 135000) {
+    if (i >= 365000) {
         return;
     }
     var crawler = new Crawler().configure({depth: 0});
@@ -69,7 +69,7 @@ var scrapeMovies = function (i) {
 }
 
 var scrapeTvshows = function (i) {
-    if (i >= 61000) {
+    if (i >= 65000) {
         return;
     }
     var crawler = new Crawler().configure({depth: 0});
@@ -77,7 +77,7 @@ var scrapeTvshows = function (i) {
     crawler.crawl({
         url: url, success: function (page) {
             OMDBTvShow.findById(i, function (err, dbTvShow) {
-                if (!dbMovie) {
+                if (!dbTvShow) {
                     var content = JSON.parse(page.content);
                     var videos = [];
                     var seasons = [];
@@ -147,11 +147,11 @@ var scrapeTvshows = function (i) {
 
 
 exports.scrapeMovies = function (req, res) {
-    scrapeMovies(0);
+    scrapeMovies(159200);
     res.status(200).send("Scraping started.")
 };
 
 exports.scrapeTvShows = function (req, res) {
-    scrapeTvshows(0);
+    scrapeTvshows(943);
     res.status(200).send("Scraping started.")
 };
