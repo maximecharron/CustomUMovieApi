@@ -18,10 +18,6 @@ exports.search = function (parameters, res) {
     }
 };
 
-exports.reviews = function (parameters, res) {
-    getMovieReviews(res, parameters.id, parameters.type);
-};
-
 exports.lookup = function (parameters, res, amount) {
     if (parameters.entity == "movieArtist") {
         queryItunesApiForActor(lookupEndPoint + qs.stringify(parameters), res, amount);
@@ -33,25 +29,6 @@ exports.lookup = function (parameters, res, amount) {
 exports.popular = function (res, type) {
     queryOmdbPopular(res, type);
 };
-
-
-function getMovieReviews(res, id, type) {
-    var url = omdbEndPoint + "movies/" + id + "/reviews?" + qs.stringify({
-            api_key: omdbApiKey
-        });
-    request({
-            uri: url,
-            method: 'GET'
-        },
-        function (error, response, body) {
-            if (!error && response.statusCode === 200) {
-                successCallback(res, JSON.parse(body));
-            } else {
-                errorCallback(res, error, response, body);
-            }
-        }
-    );
-}
 
 function queryItunesApi(url, res, amount, type) {
     request({
