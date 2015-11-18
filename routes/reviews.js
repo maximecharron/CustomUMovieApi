@@ -18,25 +18,31 @@ exports.getMovieReviews = function (req, res) {
 exports.addReviews = function (req, res) {
     User.findById(req.user.id, function (err, user) {
         if (!err) {
-            if (req.body) {
-                var review = new Reviews({
-                    author: req.user.name,
-                    author_email: req.user.email,
-                    content: req.body.content,
-                    featureId: req.params.id
-                });
-                review.save();
-                res.status(200).send(review);
+            if (!user) {
+                if (req.body) {
+                    var review = new Reviews({
+                        author: req.user.name,
+                        author_email: req.user.email,
+                        content: req.body.content,
+                        featureId: req.params.id
+                    });
+                    review.save();
+                    res.status(200).send(review);
+                } else {
+                    res.status(412).send({
+                        errorCode: 'REQUEST_BODY_REQUIRED',
+                        message: 'Request body is missing'
+                    });
+                }
             } else {
-                res.status(412).send({
-                    errorCode: 'REQUEST_BODY_REQUIRED',
-                    message: 'Request body is missing'
-                });
+                res.status(403).send("User unauthorized");
             }
+        } else {
+            console.error(err);
+            res.status(500).send(err);
         }
     });
 };
-
 
 
 function handleFindError(err, res, req) {

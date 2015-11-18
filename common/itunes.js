@@ -1,6 +1,10 @@
 var request = require('request');
 var qs = require('querystring');
 var async = require('async');
+var OMDBMovie = require('../models/omdbMovie').model;
+var OMDBVideo = require('../models/omdbVideo').model;
+var OMDBTvShow = require('../models/omdbTvShow').model;
+var OMDBSeason = require('../models/omdbSeason').model;
 
 var searchEndPoint = 'http://itunes.apple.com/search?';
 var lookupEndPoint = 'http://itunes.apple.com/lookup?';
@@ -12,7 +16,7 @@ var imageEndPoint = 'http://image.tmdb.org/t/p/w500';
 
 exports.search = function (parameters, res) {
     if (parameters.entity == "movieArtist") {
-        queryItunesApiForActor(searchEndPoint + qs.stringify(parameters), res);
+        queryItunesApiForActor(searchEndPoint + qs.stringify(parameters), res); //to do: check if needed for search
     } else {
         queryItunesApi(searchEndPoint + qs.stringify(parameters), res, parameters.entity);
     }
@@ -213,6 +217,7 @@ function callYoutube(res, body) {
     async.forEachOf(results, function (result, iterator, successYoutubeCallback) {
         var url;
         if (results[iterator].trackName !== undefined) {
+            results[iterator] = getBdOrYoutubeInfo(results[iterator], 'movie');
             url = youtubeEndPoint + qs.stringify({
                     q: results[iterator].trackName + " Trailer",
                     key: youtubeKey
@@ -240,6 +245,12 @@ function callYoutube(res, body) {
         body.results = results;
         res.status(200).send(body);
     })
+}
+
+function getBdOrYoutubeInfo(result, type){
+    if (type == 'movie'){
+
+    }
 }
 
 function successCallback(res, body) {
