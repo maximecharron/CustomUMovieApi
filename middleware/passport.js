@@ -62,7 +62,7 @@ module.exports = function (passport, app) {
 
             process.nextTick(function () {
                 if (!req.user) {
-                    User.findOne({ 'email': username }, function (err, user) {
+                    User.findOne({ 'username': username }, function (err, user) {
                         if (err) {
                             return done(err);
                         }
@@ -84,7 +84,7 @@ module.exports = function (passport, app) {
                             newUser.genres = genres;
                             newUser.username = username;
                             newUser.password = newUser.generateHash(password);
-
+                            console.log(newUser);
                             newUser.save(function (err) {
                                 if (err) {
                                     return done(err);
