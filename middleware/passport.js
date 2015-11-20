@@ -15,17 +15,15 @@ module.exports = function (passport, app) {
     });
 
     passport.use('local-login', new LocalStrategy({
-            usernameField: 'email',
+            usernameField: 'username',
             passwordField: 'password',
             passReqToCallback: true
         },
-        function (req, email, password, done) {
-            if (email) {
-                email = email.toLowerCase();
-            }
+        function (req, username, password, done) {
+
 
             process.nextTick(function () {
-                User.findOne({ 'email': email }, function (err, user) {
+                User.findOne({ 'username': username }, function (err, user) {
                     if (err) {
                         return done(err);
                     }
@@ -55,29 +53,29 @@ module.exports = function (passport, app) {
         }));
 
     passport.use('local-signup', new LocalStrategy({
-            usernameField: 'email',
+            usernameField: 'username',
             passwordField: 'password',
             passReqToCallback: true
         },
-        function (req, email, password, done) {
-            if (email) {
-                email = email.toLowerCase();
-            }
+        function (req, username, password, done) {
 
             process.nextTick(function () {
                 if (!req.user) {
-                    User.findOne({ 'email': email }, function (err, user) {
+                    User.findOne({ 'email': username }, function (err, user) {
                         if (err) {
                             return done(err);
                         }
 
                         if (user) {
-                            return done("The user with email " + email + " already exists and could not be created.");
+                            return done("The user with username " + email + " already exists and could not be created.");
                         } else {
                             var newUser = new User();
 
-                            newUser.name = req.body.name;
-                            newUser.email = email;
+                            newUser.firstname = req.body.firstname;
+                            newUser.lastname = req.body.lastname;
+                            newUser.email = req.body.email;
+                            newUser.genres = req.body.genres;
+                            newUser.username = username;
                             newUser.password = newUser.generateHash(password);
 
                             newUser.save(function (err) {
