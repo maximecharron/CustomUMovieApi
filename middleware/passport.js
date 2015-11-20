@@ -72,10 +72,12 @@ module.exports = function (passport, app) {
                         } else {
                             var newUser = new User();
                             var genres = [];
+                            console.log(req.body.genres)
                             for (var genre in req.body.genres){
+                                console.log(genre);
                                 var genreSchema = new Genre();
-                                genreSchema.id = genre.id;
-                                genreSchema.name = genre.name;
+                                genreSchema.id = req.body.genres[genre].id;
+                                genreSchema.name = req.body.genres[genre].name;
                                 genres.push(genreSchema);
                             }
                             newUser.firstname = req.body.firstname;
