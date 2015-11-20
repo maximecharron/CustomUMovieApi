@@ -4,16 +4,17 @@ var modelHelpers = require('./modelHelpers.js');
 var genreSchema =  require('./genre').model;
 var _ = require('underscore');
 
-var userSchema = new mongoose.Schema({
-    username: String,
+var userSchema = new mongoose.Schema();
+userSchema.add({
+    username : String,
     firstname: String,
-    lastname: String,
+    lastname : String,
     email: String,
     password: String,
     token: String,
     expiration: Number,
     following: [userSchema],
-    genres: [genreSchema]
+    genres : [genreSchema]
 });
 
 userSchema.methods.toDTO = function (following) {
