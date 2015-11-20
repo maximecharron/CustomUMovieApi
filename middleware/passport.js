@@ -2,6 +2,7 @@ var LocalStrategy = require('passport-local').Strategy;
 var User = require('../models/user').model;
 var moment = require('moment');
 var jwt = require('jwt-simple');
+var Genre = require('../models/genre').model;
 
 module.exports = function (passport, app) {
     passport.serializeUser(function (user, done) {
@@ -67,14 +68,20 @@ module.exports = function (passport, app) {
                         }
 
                         if (user) {
-                            return done("The user with username " + email + " already exists and could not be created.");
+                            return done("The user with username " + username + " already exists and could not be created.");
                         } else {
                             var newUser = new User();
-
+                            var genres = [];
+                            for (var genre in req.body.genres){
+                                var genreSchema = new Genre();
+                                genreSchema.id = genre.id;
+                                genreSchema.name = genre.name;
+                                genres.push(genreSchema);
+                            }
                             newUser.firstname = req.body.firstname;
                             newUser.lastname = req.body.lastname;
                             newUser.email = req.body.email;
-                            newUser.genres = req.body.genres;
+                            newUser.genres = genres;
                             newUser.username = username;
                             newUser.password = newUser.generateHash(password);
 
@@ -87,9 +94,9 @@ module.exports = function (passport, app) {
                             });
                         }
                     });
-                } else if (!req.user.email) {
+                } else if (!req.user.username) {
                     var user = req.user;
-                    user.email = email;
+                    user.username = username;
                     user.password = user.generateHash(password);
                     user.save(function (err) {
                         if (err) {
