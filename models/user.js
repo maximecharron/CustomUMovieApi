@@ -15,7 +15,7 @@ userSchema.add({
     expiration: Number,
     following: [userSchema],
     genres : [genreSchema]
-});
+},{strict: false});
 
 userSchema.methods.toDTO = function (following) {
     var obj = this.toObject();
