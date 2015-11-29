@@ -16,15 +16,15 @@ module.exports = function (passport, app) {
     });
 
     passport.use('local-login', new LocalStrategy({
-            usernameField: 'username',
+            emailField: 'email',
             passwordField: 'password',
             passReqToCallback: true
         },
-        function (req, username, password, done) {
+        function (req, email, password, done) {
 
 
             process.nextTick(function () {
-                User.findOne({ 'username': username }, function (err, user) {
+                User.findOne({ 'email': email }, function (err, user) {
                     if (err) {
                         return done(err);
                     }
@@ -54,21 +54,21 @@ module.exports = function (passport, app) {
         }));
 
     passport.use('local-signup', new LocalStrategy({
-            usernameField: 'username',
+            emailField: 'email',
             passwordField: 'password',
             passReqToCallback: true
         },
-        function (req, username, password, done) {
+        function (req, email, password, done) {
 
             process.nextTick(function () {
                 if (!req.user) {
-                    User.findOne({ 'username': username }, function (err, user) {
+                    User.findOne({ 'email': email }, function (err, user) {
                         if (err) {
                             return done(err);
                         }
 
                         if (user) {
-                            return done("The user with username " + username + " already exists and could not be created.");
+                            return done("The user with email " + email + " already exists and could not be created.");
                         } else {
                             var newUser = new User();
                             var genres = [];
