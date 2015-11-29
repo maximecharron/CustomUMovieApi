@@ -15,11 +15,7 @@ var omdbApiKey = '7ff441f342ce66026152b06ccc348229';
 var imageEndPoint = 'http://image.tmdb.org/t/p/w500';
 
 exports.search = function (parameters, res) {
-    if (parameters.entity == "movieArtist") {
-        queryItunesApiForActor(searchEndPoint + qs.stringify(parameters), res); //to do: check if needed for search
-    } else {
         queryItunesApi(searchEndPoint + qs.stringify(parameters), res, parameters.entity);
-    }
 };
 
 exports.lookup = function (parameters, res, amount) {
@@ -33,6 +29,10 @@ exports.lookup = function (parameters, res, amount) {
 exports.popular = function (res, type) {
     queryOmdbPopular(res, type);
 };
+
+exports.similar = function(res, type){
+    queryOmdbSimilar(res, type);
+}
 
 function queryItunesApi(url, res, amount, type) {
     request({
@@ -111,6 +111,63 @@ function queryOmdbPopular(res, type) {
                         limit: 1
                     })
             }
+            request({
+                    uri: urlSearch,
+                    method: 'GET'
+                },
+                function (error, response, body) {
+                    if (!error && response.statusCode === 200) {
+                        if (JSON.parse(body).results[0] !== undefined) {
+                            itunesResults.push(JSON.parse(body).results[0]);
+                        }
+                    } else {
+                        errorCallback(res, error, response, body);
+                    }
+                    successYoutubeCallback(null);
+                }
+            );
+        }, function (error) {
+            successItunesCallback(null);
+        })
+    }, function (callback, error) {
+        if (error) {
+            console.log(error);
+        }
+        callYoutube(res, itunesResults)
+        callback(null);
+    }])
+}
+
+function queryOmdbSimilar(res, type) {
+    var urlPopular;
+        urlPopular = omdbEndPoint + "movie/"+res.body.id+"/similar?" + qs.stringify({
+                api_key: omdbApiKey
+            })
+    var results;
+    var itunesResults = [];
+    async.waterfall([function (successPopularCallback) {
+        request({
+                uri: urlPopular,
+                method: 'GET'
+            },
+            function (error, response, body) {
+                if (!error && response.statusCode === 200) {
+                    results = JSON.parse(body).results;
+                    results.splice(10, 10);
+                } else {
+                    console.log("Failed to get popular movies/tv shows");
+                }
+                successPopularCallback(null);
+            }
+        );
+    }, function (successItunesCallback) {
+        async.forEachOf(results, function (result, iterator, successYoutubeCallback) {
+            var urlSearch = searchEndPoint + qs.stringify({
+                        term: result.original_title,
+                        media: 'movie',
+                        entity: 'movie',
+                        limit: 1
+                    })
             request({
                     uri: urlSearch,
                     method: 'GET'
@@ -217,38 +274,101 @@ function callYoutube(res, body) {
     async.forEachOf(results, function (result, iterator, successYoutubeCallback) {
         var url;
         if (results[iterator].trackName !== undefined) {
-            results[iterator] = getBdOrYoutubeInfo(results[iterator], 'movie');
-            url = youtubeEndPoint + qs.stringify({
-                    q: results[iterator].trackName + " Trailer",
-                    key: youtubeKey
-                });
+            var regex = new RegExp("(.*){1}(\(\d*\)){1,}");
+
+            var omdbSearchTitle = regex.exec(results[iterator].trackName);
+            console.log(omdbSearchTitle[1])
+            OMDBMovie.find({"title" : omdbSearchTitle[1]}, function(err, omdbmovie){
+                if (omdbmovie[0]== undefined){
+                    var url = youtubeEndPoint + qs.stringify({
+                            q: results[iterator].trackName + " Trailer",
+                            key: youtubeKey
+                        });
+                    request({
+                            uri: url,
+                            method: 'GET'
+                        },
+                        function (error, response, body) {
+                            if (!error && response.statusCode === 200) {
+                                result.previewUrl = "https://www.youtube.com/watch?v=" + JSON.parse(body).items[0].id.videoId;
+                            } else {
+                                console.log("Failed to get video for " + results[iterator].trackName);
+                            }
+                            successYoutubeCallback(null);
+                        }
+                    );
+                } else {
+                    results[iterator].videos = omdbmovie[0].videos;
+                    for (var video in omdbmovie[0].videos){
+                        if (omdbmovie[0].videos[video].type == "Trailer"){
+                            results[iterator].previewUrl = "https://www.youtube.com/watch?v=" + omdbmovie[0].videos[video]._id;
+                        }
+                    }
+                    successYoutubeCallback(null);
+                }
+
+            });
         } else {
             url = youtubeEndPoint + qs.stringify({
                     q: results[iterator].collectionName + " Trailer",
                     key: youtubeKey
                 });
         }
-        request({
-                uri: url,
-                method: 'GET'
-            },
-            function (error, response, body) {
-                if (!error && response.statusCode === 200) {
-                    results[iterator].previewUrl = "https://www.youtube.com/watch?v=" + JSON.parse(body).items[0].id.videoId;
-                } else {
-                    console.log("Failed to get video for " + result.trackName);
-                }
-                successYoutubeCallback(null);
-            }
-        );
+        //request({
+        //        uri: url,
+        //        method: 'GET'
+        //    },
+        //    function (error, response, body) {
+        //        if (!error && response.statusCode === 200) {
+        //            results[iterator].previewUrl = "https://www.youtube.com/watch?v=" + JSON.parse(body).items[0].id.videoId;
+        //        } else {
+        //            console.log("Failed to get video for " + result.trackName);
+        //        }
+        //        successYoutubeCallback(null);
+        //    }
+        //);
     }, function (error) {
         body.results = results;
         res.status(200).send(body);
     })
 }
 
-function getBdOrYoutubeInfo(result, type){
+function getBdOrYoutubeInfo(result, type, successYoutubeCallback){
     if (type == 'movie'){
+        var regex = new RegExp("(.*){1}(\(\d*\)){1,}");
+
+        var omdbSearchTitle = regex.exec(result.trackName);
+        console.log(omdbSearchTitle[1])
+        OMDBMovie.find({"title" : omdbSearchTitle[1]}, function(err, omdbmovie){
+        if (omdbmovie[0]== undefined){
+            var url = youtubeEndPoint + qs.stringify({
+                    q: result.trackName + " Trailer",
+                    key: youtubeKey
+                });
+            request({
+                    uri: url,
+                    method: 'GET'
+                },
+                function (error, response, body) {
+                    if (!error && response.statusCode === 200) {
+                        result.previewUrl = "https://www.youtube.com/watch?v=" + JSON.parse(body).items[0].id.videoId;
+                    } else {
+                        console.log("Failed to get video for " + result.trackName);
+                    }
+                    successYoutubeCallback(null);
+                }
+            );
+        } else {
+           result.videos = omdbmovie[0].videos;
+            for (var video in omdbmovie[0].videos){
+                if (omdbmovie[0].videos[video].type == "trailer"){
+                    result.previewUrl = "https://www.youtube.com/watch?v=" + omdbmovie[0].videos[video]._id;
+                }
+            }
+        }
+            return result;
+        });
+    } else {
 
     }
 }
