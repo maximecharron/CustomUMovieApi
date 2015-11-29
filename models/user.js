@@ -1,16 +1,20 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs');
 var modelHelpers = require('./modelHelpers.js');
+var genreSchema =  require('./genre').model;
 var _ = require('underscore');
 
 var userSchema = new mongoose.Schema();
 userSchema.add({
-    name: String,
+    username : String,
+    firstname: String,
+    lastname : String,
     email: String,
     password: String,
     token: String,
     expiration: Number,
-    following: [userSchema]
+    following: [userSchema],
+    genres : [genreSchema]
 });
 
 userSchema.methods.toDTO = function (following) {
@@ -18,8 +22,11 @@ userSchema.methods.toDTO = function (following) {
 
     var dto = {
         id: obj._id,
-        name: obj.name,
-        email: obj.email
+        username : obj.username,
+        firstname: obj.lastname,
+        lastname : obj.firstname,
+        email: obj.email,
+        genres : obj.genres
     };
 
     if (following) {

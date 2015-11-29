@@ -19,8 +19,11 @@ exports.welcome = function (req, res) {
             user: {
                 id: req.user._id,
                 email : req.user.email,
-                name: req.user.name,
-                friends: req.user.friends
+                firstname: req.user.firstname,
+                lastname : req.user.lastname,
+                username : req.user.username,
+                genres : req.user.genres,
+                following: req.user.following
             }
         });
     }

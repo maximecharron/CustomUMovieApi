@@ -2,6 +2,7 @@ var LocalStrategy = require('passport-local').Strategy;
 var User = require('../models/user').model;
 var moment = require('moment');
 var jwt = require('jwt-simple');
+var Genre = require('../models/genre').model;
 
 module.exports = function (passport, app) {
     passport.serializeUser(function (user, done) {
@@ -15,17 +16,15 @@ module.exports = function (passport, app) {
     });
 
     passport.use('local-login', new LocalStrategy({
-            usernameField: 'email',
+            usernameField: 'username',
             passwordField: 'password',
             passReqToCallback: true
         },
-        function (req, email, password, done) {
-            if (email) {
-                email = email.toLowerCase();
-            }
+        function (req, username, password, done) {
+
 
             process.nextTick(function () {
-                User.findOne({ 'email': email }, function (err, user) {
+                User.findOne({ 'username': username }, function (err, user) {
                     if (err) {
                         return done(err);
                     }
@@ -55,33 +54,45 @@ module.exports = function (passport, app) {
         }));
 
     passport.use('local-signup', new LocalStrategy({
-            usernameField: 'email',
+            usernameField: 'username',
             passwordField: 'password',
             passReqToCallback: true
         },
-        function (req, email, password, done) {
-            if (email) {
-                email = email.toLowerCase();
-            }
+        function (req, username, password, done) {
 
             process.nextTick(function () {
                 if (!req.user) {
-                    User.findOne({ 'email': email }, function (err, user) {
+                    User.findOne({ 'username': username }, function (err, user) {
                         if (err) {
                             return done(err);
                         }
 
                         if (user) {
-                            return done("The user with email " + email + " already exists and could not be created.");
+                            return done("The user with username " + username + " already exists and could not be created.");
                         } else {
                             var newUser = new User();
+                            var genres = [];
+                            console.log(req.body.genres)
+                            for (var genre in req.body.genres){
+                                console.log(genre);
+                                var genreSchema = new Genre();
+                                genreSchema.id = req.body.genres[genre].id;
+                                genreSchema.name = req.body.genres[genre].name;
+                                genres.push(genreSchema);
+                            }
+                            newUser.firstname = req.body.firstname;
+                            newUser.lastname = req.body.lastname;
+                            newUser.email = req.body.email;
+                            if (genres.size > 0){
+                                newUser.genres = genres;
+                            }
 
-                            newUser.name = req.body.name;
-                            newUser.email = email;
+                            newUser.username = username;
                             newUser.password = newUser.generateHash(password);
-
+                            console.log(newUser);
                             newUser.save(function (err) {
                                 if (err) {
+                                    console.log(err);
                                     return done(err);
                                 }
 
@@ -89,9 +100,9 @@ module.exports = function (passport, app) {
                             });
                         }
                     });
-                } else if (!req.user.email) {
+                } else if (!req.user.username) {
                     var user = req.user;
-                    user.email = email;
+                    user.username = username;
                     user.password = user.generateHash(password);
                     user.save(function (err) {
                         if (err) {
