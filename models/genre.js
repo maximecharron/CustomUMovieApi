@@ -3,8 +3,9 @@ var Schema = mongoose.Schema;
 var modelHelpers = require('./modelHelpers.js');
 
 var genreSchema = new Schema({
-    genreId : Number,
-    genreName : String
+    entityCode: String,
+    id : String,
+    name: String
 });
 
 genreSchema.method('toJSON', modelHelpers.toJSON);

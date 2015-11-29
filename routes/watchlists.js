@@ -9,9 +9,16 @@ exports.addMovieToWatchlist = function (req, res) {
             if (watchlist) {
                 if (req.body) {
                     var movie = new Movie(req.body);
-                    watchlist.movies.push(movie.toJSON());
-                    watchlist.save();
-                    res.status(200).send(watchlist);
+                    if (isInWatchlist(watchlist.movies, movie.trackId)) {
+                        res.status(418).send({
+                            errorCode: 'MOVIE_IN_WATCHLIST',
+                            message: 'Movie is already in watchlist'
+                        });
+                    } else {
+                        watchlist.movies.push(movie.toJSON());
+                        watchlist.save();
+                        res.status(200).send(watchlist);
+                    }
                 } else {
                     res.status(412).send({
                         errorCode: 'REQUEST_BODY_REQUIRED',
@@ -26,6 +33,16 @@ exports.addMovieToWatchlist = function (req, res) {
         }
     });
 };
+
+
+function isInWatchlist(movies, id) {
+    for (var movie in movies) {
+        if (movie.trackId == id) {
+            return true;
+        }
+    }
+    return false;
+}
 
 exports.createWatchlist = function (req, res) {
     User.findById(req.user.id, function (err, user) {
@@ -108,7 +125,7 @@ exports.removeMovieFromWatchlist = function (req, res) {
                 sendWatchlistNotFoundError(res, req);
             }
         } else {
-            handleFindByIdError(err,res,req);
+            handleFindByIdError(err, res, req);
         }
     });
 };
@@ -117,7 +134,7 @@ exports.removeWatchlist = function (req, res) {
     Watchlist.findById(req.params.id, function (err, watchlist) {
         if (!err) {
             if (watchlist) {
-                if(watchlist.owner.id == req.user.id) {
+                if (watchlist.owner.id == req.user.id) {
                     watchlist.remove();
                     res.status(200).send({
                         message: 'Watchlist ' + req.params.id + ' deleted successfully.'
@@ -133,7 +150,7 @@ exports.removeWatchlist = function (req, res) {
                 sendWatchlistNotFoundError(res, req);
             }
         } else {
-            handleFindByIdError(err,res,req);
+            handleFindByIdError(err, res, req);
         }
     });
 };
@@ -150,7 +167,7 @@ exports.removeWatchlistUnsecure = function (req, res) {
                 sendWatchlistNotFoundError(res, req);
             }
         } else {
-            handleFindByIdError(err,res,req);
+            handleFindByIdError(err, res, req);
         }
     });
 };
@@ -167,7 +184,7 @@ exports.updateWatchlist = function (req, res) {
                 sendWatchlistNotFoundError(res, req);
             }
         } else {
-            handleFindByIdError(err,res,req);
+            handleFindByIdError(err, res, req);
         }
     });
 };
