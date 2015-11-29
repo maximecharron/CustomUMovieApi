@@ -2,7 +2,7 @@ var Reviews = require('../models/reviews').model;
 var User = require('../models/user').model;
 
 exports.getMovieReviews = function (req, res) {
-    Reviews.find({featureId: req.params.id}, function (err, reviews) {
+    Reviews.find({featureId: req.params.id, type: "movie"}, function (err, reviews) {
         if (!err) {
             if (reviews) {
                 res.status(200).send(reviews);
@@ -15,15 +15,38 @@ exports.getMovieReviews = function (req, res) {
     })
 };
 
-exports.addReviews = function (req, res) {
+exports.getTvReviews = function (req, res) {
+    Reviews.find({featureId: req.params.id, type: "tv"}, function (err, reviews) {
+        if (!err) {
+            if (reviews) {
+                res.status(200).send(reviews);
+            } else {
+                sendReviewsNotFoundError();
+            }
+        } else {
+            handleFindError();
+        }
+    })
+};
+
+exports.addMovieReviews = function(req, res){
+    addReviews(req, res, "movie");
+}
+
+exports.addTvReviews = function(req, res){
+    addReviews(req, res, "tv");
+}
+
+var addReviews = function (req, res, type) {
     User.findById(req.user.id, function (err, user) {
         if (!err) {
             if (!user) {
                 if (req.body) {
                     var review = new Reviews({
-                        author: req.user.name,
+                        author: req.user.username,
                         author_email: req.user.email,
                         content: req.body.content,
+                        type: type,
                         featureId: req.params.id
                     });
                     review.save();
@@ -35,7 +58,7 @@ exports.addReviews = function (req, res) {
                     });
                 }
             } else {
-                res.status(403).send("User unauthorized");
+                res.status(401).send("User unauthorized");
             }
         } else {
             console.error(err);

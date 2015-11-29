@@ -23,6 +23,7 @@ var user = require('./routes/user');
 var watchlist = require('./routes/watchlists');
 var scraper = require('./common/scraper.js');
 var home = require('./routes/home');
+var reviews = require('.routes/reviews');
 
 var app = express();
 var corsOptions = {
@@ -88,13 +89,17 @@ app.delete('/follow/:id', authentication.isAuthenticated, user.unfollow);
 app.get('/actors/:id', authentication.isAuthenticated, lookup.getActor);
 app.get('/actors/:id/movies', authentication.isAuthenticated, lookup.getActorMovies);
 app.get('/movies/:id', authentication.isAuthenticated, lookup.getMovie);
-app.get('/movies/:id/reviews', authentication.isAuthenticated, lookup.getMovieReviews);
+app.get('/movies/:id/reviews', authentication.isAuthenticated, reviews.getMovieReviews);
 app.get('/tvshows/season/:id', authentication.isAuthenticated, lookup.getTvShowSeason);
+app.get('/tvshows/season/:id/reviews', authentication.isAuthenticated, reviews.getTvReviews);
 app.get('/tvshows/season/:id/episodes', authentication.isAuthenticated, lookup.getTvShowEpisodes);
 app.get('/popular/movies', authentication.isAuthenticated, home.getPopularMovies);
 app.get('/popular/tvshows', authentication.isAuthenticated, home.getPopularTvShows);
 app.get('/similar/movies/:id', authentication.isAuthenticated, home.getSimilarMovies);
 app.get('/similar/tvshows/:id', authentication.isAuthenticated, home.getSimilarTvshows);
+app.post('/movies/reviews', authentication.isAuthenticated, reviews.addMovieReviews);
+app.post('/tvshows/reviews', authentication.isAuthenticated, reviews.addTvReviews);
+
 
 app.get('/watchlists', authentication.isAuthenticated, watchlist.getWatchlists);
 app.post('/watchlists', authentication.isAuthenticated, watchlist.createWatchlist);
@@ -127,6 +132,7 @@ app.get('/unsecure/actors/:id/movies', lookup.getActorMovies);
 app.get('/unsecure/movies/:id', lookup.getMovie);
 app.get('/unsecure/movies/:id/reviews', lookup.getMovieReviews);
 app.get('/unsecure/tvshows/season/:id', lookup.getTvShowSeason);
+app.get('/tvshows/season/:id/reviews', authentication.isAuthenticated, reviews.getTvReviews);
 app.get('/unsecure/tvshows/season/:id/episodes', lookup.getTvShowEpisodes);
 app.get('/unsecure/popular/movies', home.getPopularMovies);
 app.get('/unsecure/popular/tvshows', home.getPopularTvShows);

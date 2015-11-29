@@ -2,12 +2,10 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var modelHelpers = require('./modelHelpers.js');
 var reviewSchema = new Schema({
-    content : String,
-    owner: {
-        id: String,
-        email: String,
-        name: String
-    },
+    author: String,
+    author_email: String,
+    content: String,
+    type: String,
     featureId: String
 }, {strict:false});
 
