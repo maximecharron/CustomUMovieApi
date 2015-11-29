@@ -23,7 +23,7 @@ var user = require('./routes/user');
 var watchlist = require('./routes/watchlists');
 var scraper = require('./common/scraper.js');
 var home = require('./routes/home');
-var reviews = require('.routes/reviews.js');
+var reviews = require('./routes/reviews.js');
 
 var app = express();
 var corsOptions = {
