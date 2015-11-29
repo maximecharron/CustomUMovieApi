@@ -16,7 +16,7 @@ module.exports = function (passport, app) {
     });
 
     passport.use('local-login', new LocalStrategy({
-            emailField: 'email',
+            usernameField: 'email',
             passwordField: 'password',
             passReqToCallback: true
         },
@@ -54,12 +54,14 @@ module.exports = function (passport, app) {
         }));
 
     passport.use('local-signup', new LocalStrategy({
-            emailField: 'email',
+            usernameField: 'email',
             passwordField: 'password',
             passReqToCallback: true
         },
         function (req, email, password, done) {
-
+            if (email) {
+                email = email.toLowerCase();
+            }
             process.nextTick(function () {
                 if (!req.user) {
                     User.findOne({ 'email': email }, function (err, user) {
