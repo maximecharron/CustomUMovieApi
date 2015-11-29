@@ -15,7 +15,7 @@ var omdbApiKey = '7ff441f342ce66026152b06ccc348229';
 var imageEndPoint = 'http://image.tmdb.org/t/p/w500';
 
 exports.search = function (parameters, res) {
-        queryItunesApi(searchEndPoint + qs.stringify(parameters), res, parameters.entity);
+    queryItunesApi(searchEndPoint + qs.stringify(parameters), res, parameters.entity);
 };
 
 exports.lookup = function (parameters, res, amount) {
@@ -30,8 +30,8 @@ exports.popular = function (res, type) {
     queryOmdbPopular(res, type);
 };
 
-exports.similar = function(res, type){
-    queryOmdbSimilar(res, type);
+exports.similar = function (req, res, type) {
+    queryOmdbSimilar(req, res, type);
 }
 
 function queryItunesApi(url, res, amount, type) {
@@ -118,7 +118,10 @@ function queryOmdbPopular(res, type) {
                 function (error, response, body) {
                     if (!error && response.statusCode === 200) {
                         if (JSON.parse(body).results[0] !== undefined) {
-                            itunesResults.push(JSON.parse(body).results[0]);
+                            var itunesResult = JSON.parse(body).results[0];
+                            itunesResult.poster_path = imageEndPoint + result.poster_path;
+                            itunesResult.omdbId = result.id;
+                            itunesResults.push(itunesResult);
                         }
                     } else {
                         errorCallback(res, error, response, body);
@@ -138,11 +141,12 @@ function queryOmdbPopular(res, type) {
     }])
 }
 
-function queryOmdbSimilar(res, type) {
+function queryOmdbSimilar(req, res, type) {
     var urlPopular;
-        urlPopular = omdbEndPoint + "movie/"+res.body.id+"/similar?" + qs.stringify({
-                api_key: omdbApiKey
-            })
+    urlPopular = omdbEndPoint + type + "/" + req.params.id + "/similar?" + qs.stringify({
+            api_key: omdbApiKey,
+            append_to_response: "video"
+        })
     var results;
     var itunesResults = [];
     async.waterfall([function (successPopularCallback) {
@@ -162,12 +166,23 @@ function queryOmdbSimilar(res, type) {
         );
     }, function (successItunesCallback) {
         async.forEachOf(results, function (result, iterator, successYoutubeCallback) {
-            var urlSearch = searchEndPoint + qs.stringify({
+            var urlSearch;
+            console.log(results.length);
+            if (type == 'movie') {
+                urlSearch = searchEndPoint + qs.stringify({
                         term: result.original_title,
                         media: 'movie',
                         entity: 'movie',
                         limit: 1
                     })
+            } else {
+                urlSearch = searchEndPoint + qs.stringify({
+                        term: result.original_name,
+                        media: 'tvShow',
+                        entity: 'tvSeason',
+                        limit: 1
+                    })
+            }
             request({
                     uri: urlSearch,
                     method: 'GET'
@@ -175,7 +190,10 @@ function queryOmdbSimilar(res, type) {
                 function (error, response, body) {
                     if (!error && response.statusCode === 200) {
                         if (JSON.parse(body).results[0] !== undefined) {
-                            itunesResults.push(JSON.parse(body).results[0]);
+                            var itunesResult = JSON.parse(body).results[0];
+                            itunesResult.poster_path = imageEndPoint + result.poster_path;
+                            itunesResult.omdbId = result.id;
+                            itunesResults.push(itunesResult);
                         }
                     } else {
                         errorCallback(res, error, response, body);
@@ -278,99 +296,93 @@ function callYoutube(res, body) {
 
             var omdbSearchTitle = regex.exec(results[iterator].trackName);
             console.log(omdbSearchTitle[1])
-            OMDBMovie.find({"title" : omdbSearchTitle[1]}, function(err, omdbmovie){
-                if (omdbmovie[0]== undefined){
-                    var url = youtubeEndPoint + qs.stringify({
-                            q: results[iterator].trackName + " Trailer",
-                            key: youtubeKey
-                        });
-                    request({
-                            uri: url,
-                            method: 'GET'
-                        },
-                        function (error, response, body) {
-                            if (!error && response.statusCode === 200) {
-                                result.previewUrl = "https://www.youtube.com/watch?v=" + JSON.parse(body).items[0].id.videoId;
-                            } else {
-                                console.log("Failed to get video for " + results[iterator].trackName);
+            if (!results[iterator].omdbId) {
+                OMDBMovie.find({"title": omdbSearchTitle[1]}, function (err, omdbmovie) {
+                    if (omdbmovie[0] == undefined) {
+                        var url = youtubeEndPoint + qs.stringify({
+                                q: results[iterator].trackName + " Trailer",
+                                key: youtubeKey
+                            });
+                        request({
+                                uri: url,
+                                method: 'GET'
+                            },
+                            function (error, response, body) {
+                                if (!error && response.statusCode === 200) {
+                                    result.previewUrl = "https://www.youtube.com/watch?v=" + JSON.parse(body).items[0].id.videoId;
+                                } else {
+                                    console.log("Failed to get video for " + results[iterator].trackName);
+                                }
+                                successYoutubeCallback(null);
                             }
-                            successYoutubeCallback(null);
+                        );
+                    } else {
+                        results[iterator].videos = omdbmovie[0].videos;
+                        for (var video in omdbmovie[0].videos) {
+                            if (omdbmovie[0].videos[video].type == "Trailer") {
+                                results[iterator].previewUrl = "https://www.youtube.com/watch?v=" + omdbmovie[0].videos[video]._id;
+                            }
                         }
-                    );
-                } else {
-                    results[iterator].videos = omdbmovie[0].videos;
-                    for (var video in omdbmovie[0].videos){
-                        if (omdbmovie[0].videos[video].type == "Trailer"){
-                            results[iterator].previewUrl = "https://www.youtube.com/watch?v=" + omdbmovie[0].videos[video]._id;
-                        }
+                        successYoutubeCallback(null);
                     }
-                    successYoutubeCallback(null);
-                }
 
-            });
+                });
+            } else {
+                OMDBMovie.find({"_id" : results[iterator].omdbId}, function (err, omdbmovie) {
+                    if (omdbmovie[0] == undefined) {
+                        var url = youtubeEndPoint + qs.stringify({
+                                q: results[iterator].trackName + " Trailer",
+                                key: youtubeKey
+                            });
+                        request({
+                                uri: url,
+                                method: 'GET'
+                            },
+                            function (error, response, body) {
+                                if (!error && response.statusCode === 200) {
+                                    result.previewUrl = "https://www.youtube.com/watch?v=" + JSON.parse(body).items[0].id.videoId;
+                                } else {
+                                    console.log("Failed to get video for " + results[iterator].trackName);
+                                }
+                                successYoutubeCallback(null);
+                            }
+                        );
+                    } else {
+                        results[iterator].videos = omdbmovie[0].videos;
+                        for (var video in omdbmovie[0].videos) {
+                            if (omdbmovie[0].videos[video].type == "Trailer") {
+                                results[iterator].previewUrl = "https://www.youtube.com/watch?v=" + omdbmovie[0].videos[video]._id;
+                            }
+                        }
+                        successYoutubeCallback(null);
+                    }
+
+                });
+            }
+
         } else {
             url = youtubeEndPoint + qs.stringify({
                     q: results[iterator].collectionName + " Trailer",
                     key: youtubeKey
                 });
         }
-        //request({
-        //        uri: url,
-        //        method: 'GET'
-        //    },
-        //    function (error, response, body) {
-        //        if (!error && response.statusCode === 200) {
-        //            results[iterator].previewUrl = "https://www.youtube.com/watch?v=" + JSON.parse(body).items[0].id.videoId;
-        //        } else {
-        //            console.log("Failed to get video for " + result.trackName);
-        //        }
-        //        successYoutubeCallback(null);
-        //    }
-        //);
+        request({
+                uri: url,
+                method: 'GET'
+            },
+            function (error, response, body) {
+                if (!error && response.statusCode === 200) {
+                    result.previewUrl = "https://www.youtube.com/watch?v=" + JSON.parse(body).items[0].id.videoId;
+                } else {
+                    console.log("Failed to get video for " + results[iterator].trackName);
+                }
+                successYoutubeCallback(null);
+            }
+        );
     }, function (error) {
         body.results = results;
         res.status(200).send(body);
     })
-}
-
-function getBdOrYoutubeInfo(result, type, successYoutubeCallback){
-    if (type == 'movie'){
-        var regex = new RegExp("(.*){1}(\(\d*\)){1,}");
-
-        var omdbSearchTitle = regex.exec(result.trackName);
-        console.log(omdbSearchTitle[1])
-        OMDBMovie.find({"title" : omdbSearchTitle[1]}, function(err, omdbmovie){
-        if (omdbmovie[0]== undefined){
-            var url = youtubeEndPoint + qs.stringify({
-                    q: result.trackName + " Trailer",
-                    key: youtubeKey
-                });
-            request({
-                    uri: url,
-                    method: 'GET'
-                },
-                function (error, response, body) {
-                    if (!error && response.statusCode === 200) {
-                        result.previewUrl = "https://www.youtube.com/watch?v=" + JSON.parse(body).items[0].id.videoId;
-                    } else {
-                        console.log("Failed to get video for " + result.trackName);
-                    }
-                    successYoutubeCallback(null);
-                }
-            );
-        } else {
-           result.videos = omdbmovie[0].videos;
-            for (var video in omdbmovie[0].videos){
-                if (omdbmovie[0].videos[video].type == "trailer"){
-                    result.previewUrl = "https://www.youtube.com/watch?v=" + omdbmovie[0].videos[video]._id;
-                }
-            }
-        }
-            return result;
-        });
-    } else {
-
-    }
 }
 
 function successCallback(res, body) {
