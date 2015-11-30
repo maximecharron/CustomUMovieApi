@@ -40,7 +40,6 @@ exports.addTvReviews = function(req, res){
 var addReviews = function (req, res, type) {
     User.findById(req.user._id, function (err, user) {
         if (!err) {
-            if (!user) {
                 if (req.body) {
                     var review = new Reviews({
                         author: req.user.username,
@@ -57,10 +56,6 @@ var addReviews = function (req, res, type) {
                         message: 'Request body is missing'
                     });
                 }
-            } else {
-                console.log(req.user);
-                res.status(401).send("User unauthorized");
-            }
         } else {
             console.error(err);
             res.status(500).send(err);
