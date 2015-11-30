@@ -38,7 +38,7 @@ exports.addTvReviews = function(req, res){
 }
 
 var addReviews = function (req, res, type) {
-    User.findById(req.user.id, function (err, user) {
+    User.findById(req.user._id, function (err, user) {
         if (!err) {
             if (!user) {
                 if (req.body) {
