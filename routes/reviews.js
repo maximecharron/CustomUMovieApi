@@ -47,7 +47,7 @@ var addReviews = function (req, res, type) {
                         author_email: req.user.email,
                         content: req.body.content,
                         type: type,
-                        featureId: req.params.id
+                        featureId: req.body.id
                     });
                     review.save();
                     res.status(200).send(review);
@@ -58,6 +58,7 @@ var addReviews = function (req, res, type) {
                     });
                 }
             } else {
+                console.log(req.user);
                 res.status(401).send("User unauthorized");
             }
         } else {
