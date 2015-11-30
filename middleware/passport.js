@@ -83,12 +83,12 @@ module.exports = function (passport, app) {
                             }
                             newUser.firstname = req.body.firstname;
                             newUser.lastname = req.body.lastname;
-                            newUser.email = req.body.email;
+                            newUser.email = email;
                             if (genres.size > 0){
                                 newUser.genres = genres;
                             }
 
-                            newUser.username = username;
+                            newUser.username = req.body.username;
                             newUser.password = newUser.generateHash(password);
                             console.log(newUser);
                             newUser.save(function (err) {
