@@ -317,7 +317,7 @@ function callYoutube(res, body) {
                         );
                     } else {
                         results[iterator].videos = omdbmovie[0].videos;
-                        results[iterator].omdbId = omdbmove[0]._id;
+                        results[iterator].omdbId = omdbmovie[0]._id;
                         for (var video in omdbmovie[0].videos) {
                             if (omdbmovie[0].videos[video].type == "Trailer") {
                                 results[iterator].previewUrl = "https://www.youtube.com/watch?v=" + omdbmovie[0].videos[video]._id;
