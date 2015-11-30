@@ -353,7 +353,6 @@ function callYoutube(res, body) {
                             if (omdbmovie[0].videos[video].type == "Trailer") {
                                 console.log("in omdb movie");
                                 results[iterator].previewUrl = "https://www.youtube.com/watch?v=" + omdbmovie[0].videos[video]._id;
-                                successYoutubeCallback(null);
                             }
                         }
                         if (results[iterator].previewUrl.indexOf("youtube") == -1){
@@ -368,10 +367,10 @@ function callYoutube(res, body) {
                                     } else {
                                         console.log("Failed to get video for " + results[iterator].trackName);
                                     }
-                                    successYoutubeCallback(null);
                                 }
                             );
                         }
+                        successYoutubeCallback(null);
                     }
 
                 });
