@@ -293,7 +293,6 @@ function callYoutube(res, body) {
         var url;
         if (results[iterator].trackName !== undefined) {
             var regex = new RegExp("(.*){1}(\(\d*\)){1,}");
-
             var omdbSearchTitle = regex.exec(results[iterator].trackName);
             if (!results[iterator].omdbId) {
                 OMDBMovie.find({"title": omdbSearchTitle[1]}, function (err, omdbmovie) {
@@ -349,14 +348,13 @@ function callYoutube(res, body) {
                         );
                     } else {
                         results[iterator].videos = omdbmovie[0].videos;
+                        results[iterator].omdbId = omdbmovie[0]._id;
                         for (var video in omdbmovie[0].videos) {
                             if (omdbmovie[0].videos[video].type == "Trailer") {
-                                console.log("in omdb movie");
                                 results[iterator].previewUrl = "https://www.youtube.com/watch?v=" + omdbmovie[0].videos[video]._id;
                             }
                         }
                         if (results[iterator].previewUrl.indexOf("youtube") == -1){
-                            console.log("youtube");
                             request({
                                     uri: url,
                                     method: 'GET'
@@ -381,14 +379,14 @@ function callYoutube(res, body) {
                     q: results[iterator].collectionName + " Trailer",
                     key: youtubeKey
                 });
-            var regex = new RegExp("(.*){1}(, Season (\d)*.*){1}", "g");
-
+            var regex = new RegExp("(.*){1}(, Season ([0-9]{1,2}){1}.*){1}", "g");
             var omdbSearchTitle = regex.exec(results[iterator].collectionName);
             async.waterfall([function (successMongoCallback) {
                 if (omdbSearchTitle != null) {
                     OMDBTvShow.find({"title": omdbSearchTitle[1]}, function (err, omdbmovie) {
                         if (omdbmovie[0] != undefined) {
-                            results[iterator].poster_path = omdbmovie[0].seasons[omdbSearchTitle[3]];
+                            results[iterator].omdbId = omdbmovie[0]._id;
+                            results[iterator].poster_path = imageEndPoint+omdbmovie[0].seasons[omdbSearchTitle[3]];
                         }
 
                     });
@@ -414,8 +412,8 @@ function callYoutube(res, body) {
                     console.log(error);
                 }
                 callback(null);
+                successYoutubeCallback(null);
             }]);
-            successYoutubeCallback(null);
         }
     }, function (error) {
         body.results = results;
