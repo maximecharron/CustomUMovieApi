@@ -2,7 +2,7 @@ var passport = require('passport');
 var request = require('request');
 var User = require('../models/user').model;
 var moment = require('moment');
-var jwt = require('jwt');
+var jwt = require('jwt-simple');
 var  FACEBOOK_SECRET = 'YOUR_FACEBOOK_CLIENT_SECRET';
 var  GOOGLE_SECRET =  'jJw1sxBOFvaMF66zb1RuSiuu';
 
