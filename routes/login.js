@@ -110,7 +110,7 @@ exports.googleLogin = function(req, res) {
                     console.log(user);
                     console.log(user.token);
                     user.save(function(err) {
-                        res.send({ token: user.token });
+                        res.send({ token: {user: user }});
                     });
                 });
             }
