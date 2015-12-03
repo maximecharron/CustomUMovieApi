@@ -86,9 +86,10 @@ exports.googleLogin = function(req, res) {
                         var splittedName = profile.name.split(" ");
                         user.firstname = user.firstname || splittedName[0];
                         user.lastname = user.lastname || splittedName[1];
-                        user.save(function() {
-                            var token = createJWT(user);
-                            res.send({ token: token });
+                        console.log(user);
+                        console.log(user.token);
+                        user.save(function(err) {
+                            res.send({ token: {user: user }});
                         });
                     });
                 });
