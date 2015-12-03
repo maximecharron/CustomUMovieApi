@@ -14,6 +14,9 @@ userSchema.add({
     token: String,
     expiration: Number,
     following: [userSchema],
+    picture: String,
+    google: String,
+    facebook: String,
     genres : [genreSchema]
 });
 
@@ -26,6 +29,9 @@ userSchema.methods.toDTO = function (following) {
         firstname: obj.lastname,
         lastname : obj.firstname,
         email: obj.email,
+        picture: obj.picture,
+        google: obj.google,
+        facebook : obj.facebook,
         genres : obj.genres
     };
 

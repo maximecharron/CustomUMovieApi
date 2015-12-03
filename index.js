@@ -60,6 +60,7 @@ app.get('/status', status.getStatus);
 app.get('/login', login.showLoginPage);
 app.post('/login', passport.authenticate('local-login'), login.getToken);
 app.get('/logout', login.logout);
+app.post('/auth/google', login.googleLogin);
 
 app.get('/signup', signup.showSignupPage);
 app.post('/signup', passport.authenticate('local-signup'), login.getToken);
