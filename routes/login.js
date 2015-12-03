@@ -86,10 +86,11 @@ exports.googleLogin = function(req, res) {
                         var splittedName = profile.name.split(" ");
                         user.firstname = user.firstname || splittedName[0];
                         user.lastname = user.lastname || splittedName[1];
+                        user.token = createJWT(user);
                         console.log(user);
                         console.log(user.token);
                         user.save(function(err) {
-                            res.send({ token: {user: user }});
+                            res.send(user);
                         });
                     });
                 });
@@ -97,7 +98,7 @@ exports.googleLogin = function(req, res) {
                 // Step 3b. Create a new user account or return an existing one.
                 User.findOne({ google: profile.sub }, function(err, existingUser) {
                     if (existingUser) {
-                        return res.send({ token: createJWT(existingUser) });
+                        return res.send(existingUser);
                     }
                     var user = new User();
                     user.google = profile.sub;
@@ -111,7 +112,7 @@ exports.googleLogin = function(req, res) {
                     console.log(user);
                     console.log(user.token);
                     user.save(function(err) {
-                        res.send({ token: {user: user }});
+                        res.send(user);
                     });
                 });
             }
