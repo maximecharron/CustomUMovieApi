@@ -5,7 +5,7 @@ var moment = require('moment');
 var jwt = require('jwt-simple');
 var  FACEBOOK_SECRET = 'YOUR_FACEBOOK_CLIENT_SECRET';
 var  GOOGLE_SECRET =  'jJw1sxBOFvaMF66zb1RuSiuu';
-
+var tokenSecret = 'UBEAT_TOKEN_SECRET' || process.env.TOKEN_SECRET;
 
 var authentication = require('../middleware/authentication');
 
@@ -123,7 +123,7 @@ function createJWT(user){
             iss: user.id,
             exp: expires
         },
-        app.get('jwtTokenSecret')
+        tokenSecret
     );
 }
 
