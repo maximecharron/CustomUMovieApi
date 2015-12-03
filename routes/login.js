@@ -106,7 +106,9 @@ exports.googleLogin = function(req, res) {
                     var splittedName = profile.name.split(" ");
                     user.firstname = user.firstname || splittedName[0];
                     user.lastname = user.lastname || splittedName[1];
-                    createJWT(user);
+                    user.token = createJWT(user);
+                    console.log(user);
+                    console.log(user.token);
                     user.save(function(err) {
                         res.send({ token: user.token });
                     });
@@ -125,5 +127,6 @@ function createJWT(user){
         },
         tokenSecret
     );
+    return user.token;
 }
 
