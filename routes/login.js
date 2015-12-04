@@ -185,8 +185,8 @@ exports.facebook = function(req, res) {
                 // Step 3b. Create a new user account or return an existing one.
                 User.findOne({ facebook: profile.id }, function(err, existingUser) {
                     if (existingUser) {
-                        var token = createJWT(existingUser);
-                        return res.send({ token: token });
+                        existingUser.token = createJWT(existingUser);
+                        return res.send(existingUser);
                     }
                     var user = new User();
                     user.facebook = profile.id;

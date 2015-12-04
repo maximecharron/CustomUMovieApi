@@ -340,6 +340,7 @@ function callYoutube(res, body) {
                             function (error, response, body) {
                                 if (!error && response.statusCode === 200) {
                                     results[iterator].previewUrl = "https://www.youtube.com/watch?v=" + JSON.parse(body).items[0].id.videoId;
+                                    console.log("Found movie : "+ results[iterator].trackName);
                                 } else {
                                     console.log("Failed to get video for " + results[iterator].trackName);
                                 }
