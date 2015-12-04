@@ -4,6 +4,7 @@ var modelHelpers = require('./modelHelpers.js');
 var reviewSchema = new Schema({
     author: String,
     author_email: String,
+    author_picture: String,
     content: String,
     type: String,
     featureId: String

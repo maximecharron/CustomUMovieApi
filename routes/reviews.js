@@ -44,6 +44,7 @@ var addReviews = function (req, res, type) {
                     var review = new Reviews({
                         author: req.user.username,
                         author_email: req.user.email,
+                        author_picture: req.user.picture,
                         content: req.body.content,
                         type: type,
                         featureId: req.body.id
