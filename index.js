@@ -61,6 +61,7 @@ app.get('/login', login.showLoginPage);
 app.post('/login', passport.authenticate('local-login'), login.getToken);
 app.get('/logout', login.logout);
 app.post('/auth/google', login.googleLogin);
+app.post('/auth/facebook', login.facebook);
 
 app.get('/signup', signup.showSignupPage);
 app.post('/signup', passport.authenticate('local-signup'), login.getToken);
@@ -73,6 +74,7 @@ app.get('/tokenInfo', authentication.isAuthenticated, login.getToken);
 
 app.get('/genres/movies', authentication.isAuthenticated, genres.getMoviesGenres);
 app.get('/genres/tvshows', authentication.isAuthenticated, genres.getTvShowsGenres);
+app.get('/genres/cache', genres.cache);
 
 app.get('/search', authentication.isAuthenticated, search.search);
 app.get('/search/actors', authentication.isAuthenticated, search.searchActor);

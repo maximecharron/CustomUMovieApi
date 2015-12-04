@@ -3,7 +3,7 @@ var request = require('request');
 var User = require('../models/user').model;
 var moment = require('moment');
 var jwt = require('jwt-simple');
-var  FACEBOOK_SECRET = 'YOUR_FACEBOOK_CLIENT_SECRET';
+var  FACEBOOK_SECRET = '261ad1a5ff2a723b295f329dd97bb09d';
 var  GOOGLE_SECRET =  'jJw1sxBOFvaMF66zb1RuSiuu';
 var tokenSecret = 'UBEAT_TOKEN_SECRET' || process.env.TOKEN_SECRET;
 
@@ -104,6 +104,7 @@ exports.googleLogin = function(req, res) {
                     user.google = profile.sub;
                     user.picture = profile.picture.replace('sz=50', 'sz=200');
                     user.username = user.username || profile.name;
+                    user.email = user.email || profile.email;
                     // split display name to populate first and last name
                     var splittedName = profile.name.split(" ");
                     user.firstname = user.firstname || splittedName[0];
@@ -130,5 +131,79 @@ function createJWT(user){
         tokenSecret
     );
     return user.token;
-}
+};
+
+exports.facebook = function(req, res) {
+    var fields = ['id', 'email', 'first_name', 'last_name', 'link', 'name'];
+    var accessTokenUrl = 'https://graph.facebook.com/v2.5/oauth/access_token';
+    var graphApiUrl = 'https://graph.facebook.com/v2.5/me?fields=' + fields.join(',');
+    var params = {
+        code: req.body.code,
+        client_id: req.body.clientId,
+        client_secret: FACEBOOK_SECRET,
+        redirect_uri: req.body.redirectUri
+    };
+
+    // Step 1. Exchange authorization code for access token.
+    request.get({ url: accessTokenUrl, qs: params, json: true }, function(err, response, accessToken) {
+        if (response.statusCode !== 200) {
+            return res.status(500).send({ message: accessToken.error.message });
+        }
+
+        // Step 2. Retrieve profile information about the current user.
+        request.get({ url: graphApiUrl, qs: accessToken, json: true }, function(err, response, profile) {
+            if (response.statusCode !== 200) {
+                return res.status(500).send({ message: profile.error.message });
+            }
+            console.log(profile);
+            if (req.headers.authorization) {
+                User.findOne({ facebook: profile.id }, function(err, existingUser) {
+                    if (existingUser) {
+                        return res.status(409).send({ message: 'There is already a Facebook account that belongs to you' });
+                    }
+                    var token = req.headers.authorization.split(' ')[1];
+                    var payload = jwt.decode(token, config.TOKEN_SECRET);
+                    User.findById(payload.sub, function(err, user) {
+                        if (!user) {
+                            return res.status(400).send({ message: 'User not found' });
+                        }
+                        user.facebook = profile.id;
+                        user.picture = user.picture || 'https://graph.facebook.com/v2.3/' + profile.id + '/picture?type=large';
+                        user.displayName = user.displayName || profile.name;
+                        user.email = user.email || profile.email;
+                        // split display name to populate first and last name
+                        var splittedName = profile.name.split(" ");
+                        user.firstname = user.firstname || splittedName[0];
+                        user.lastname = user.lastname || splittedName[1];
+                        user.token = createJWT(user);
+                        user.save(function() {
+                            res.send(user);
+                        });
+                    });
+                });
+            } else {
+                // Step 3b. Create a new user account or return an existing one.
+                User.findOne({ facebook: profile.id }, function(err, existingUser) {
+                    if (existingUser) {
+                        var token = createJWT(existingUser);
+                        return res.send({ token: token });
+                    }
+                    var user = new User();
+                    user.facebook = profile.id;
+                    user.picture = 'https://graph.facebook.com/' + profile.id + '/picture?type=large';
+                    user.displayName = profile.name;
+                    user.email = user.email || profile.email;
+                    // split display name to populate first and last name
+                    var splittedName = profile.name.split(" ");
+                    user.firstname = user.firstname || splittedName[0];
+                    user.lastname = user.lastname || splittedName[1];
+                    user.token = createJWT(user);
+                    user.save(function() {
+                        res.send(user);
+                    });
+                });
+            }
+        });
+    });
+};
 

@@ -2,7 +2,6 @@ var LocalStrategy = require('passport-local').Strategy;
 var User = require('../models/user').model;
 var moment = require('moment');
 var jwt = require('jwt-simple');
-var Genre = require('../models/genre').model;
 
 module.exports = function (passport, app) {
     passport.serializeUser(function (user, done) {
@@ -73,24 +72,13 @@ module.exports = function (passport, app) {
                             return done("The user with email " + email + " already exists and could not be created.");
                         } else {
                             var newUser = new User();
-                            var genres = [];
-                            console.log(req.body.genres)
-                            for (var genre in req.body.genres){
-                                var genreSchema = new Genre();
-                                genreSchema.id = req.body.genres[genre].id;
-                                genreSchema.name = req.body.genres[genre];
-                                genres.push(genreSchema);
-                            }
+
                             newUser.firstname = req.body.firstname;
                             newUser.lastname = req.body.lastname;
                             newUser.email = email;
-                            if (genres.size > 0){
-                                newUser.genres = genres;
-                            }
 
                             newUser.username = req.body.username;
                             newUser.password = newUser.generateHash(password);
-                            console.log(newUser);
                             newUser.save(function (err) {
                                 if (err) {
                                     console.log(err);

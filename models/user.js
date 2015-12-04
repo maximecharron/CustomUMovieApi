@@ -1,7 +1,6 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs');
 var modelHelpers = require('./modelHelpers.js');
-var genreSchema =  require('./genre').model;
 var _ = require('underscore');
 
 var userSchema = new mongoose.Schema();
@@ -16,8 +15,7 @@ userSchema.add({
     following: [userSchema],
     picture: String,
     google: String,
-    facebook: String,
-    genres : [genreSchema]
+    facebook: String
 });
 
 userSchema.methods.toDTO = function (following) {
@@ -31,8 +29,7 @@ userSchema.methods.toDTO = function (following) {
         email: obj.email,
         picture: obj.picture,
         google: obj.google,
-        facebook : obj.facebook,
-        genres : obj.genres
+        facebook : obj.facebook
     };
 
     if (following) {
