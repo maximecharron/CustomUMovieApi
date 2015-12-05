@@ -29,7 +29,8 @@ userSchema.methods.toDTO = function (following) {
         email: obj.email,
         picture: obj.picture,
         google: obj.google,
-        facebook : obj.facebook
+        facebook : obj.facebook,
+        token : obj.token
     };
 
     if (following) {
