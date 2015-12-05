@@ -46,7 +46,7 @@ module.exports = function (passport, app) {
                             return done(err);
                         }
 
-                        return done(null, user.toDto(true));
+                        return done(null, user.toDTO(true));
                     });
                 });
             });
@@ -85,7 +85,7 @@ module.exports = function (passport, app) {
                                     return done(err);
                                 }
 
-                                return done(null, newUser.toDto(true));
+                                return done(null, newUser.toDTO(true));
                             });
                         }
                     });
@@ -98,7 +98,7 @@ module.exports = function (passport, app) {
                             return done(err);
                         }
 
-                        return done(null, user.toDto(true));
+                        return done(null, user.toDTO(true));
                     });
                 } else {
                     return done(null, req.user);
