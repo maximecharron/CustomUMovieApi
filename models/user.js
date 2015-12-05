@@ -18,7 +18,7 @@ userSchema.add({
     facebook: String
 });
 
-userSchema.methods.toDTO = function (following) {
+userSchema.methods.toDTO = function (following, withToken) {
     var obj = this.toObject();
 
     var dto = {
@@ -29,8 +29,7 @@ userSchema.methods.toDTO = function (following) {
         email: obj.email,
         picture: obj.picture,
         google: obj.google,
-        facebook : obj.facebook,
-        token : obj.token
+        facebook : obj.facebook
     };
 
     if (following) {
@@ -39,6 +38,9 @@ userSchema.methods.toDTO = function (following) {
             followedUser.id = followedUser._id;
             delete followedUser._id;
         });
+    }
+    if(withToken){
+        dto.token = obj.token;
     }
 
     return dto;
