@@ -45,8 +45,10 @@ module.exports = function (passport, app) {
                         if (err) {
                             return done(err);
                         }
-
-                        return done(null, user.toDTO(true));
+                        var token = user.token;
+                        var userToReturn = user.toDTO(true);
+                        userToReturn.token = token;
+                        return done(null, userToReturn);
                     });
                 });
             });
