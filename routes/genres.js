@@ -1,4 +1,5 @@
 var request = require('request');
+var Genres = request('../models/genres');
 exports.getMoviesGenres = function (req, res) {
     getGenresInCache(req, res, '33');
 };

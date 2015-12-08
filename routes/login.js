@@ -84,6 +84,7 @@ exports.googleLogin = function(req, res) {
                         user.username = user.username || profile.name;
                         // split display name to populate first and last name
                         var splittedName = profile.name.split(" ");
+                        user.name = profile.name;
                         user.firstname = user.firstname || splittedName[0];
                         user.lastname = user.lastname || splittedName[1];
                         user.token = createJWT(user);
@@ -107,6 +108,7 @@ exports.googleLogin = function(req, res) {
                     user.email = user.email || profile.email;
                     // split display name to populate first and last name
                     var splittedName = profile.name.split(" ");
+                    user.name = profile.name;
                     user.firstname = user.firstname || splittedName[0];
                     user.lastname = user.lastname || splittedName[1];
                     user.token = createJWT(user);
@@ -173,6 +175,7 @@ exports.facebook = function(req, res) {
                         user.email = user.email || profile.email;
                         // split display name to populate first and last name
                         var splittedName = profile.name.split(" ");
+                        user.name = profile.name;
                         user.firstname = user.firstname || splittedName[0];
                         user.lastname = user.lastname || splittedName[1];
                         user.token = createJWT(user);
