@@ -21,6 +21,7 @@ exports.welcome = function (req, res) {
                 email : req.user.email,
                 firstname: req.user.firstname,
                 lastname : req.user.lastname,
+                name : req.user.firstname + " "+ req.user.lastname,
                 username : req.user.username,
                 genres : req.user.genres,
                 following: req.user.following

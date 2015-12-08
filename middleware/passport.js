@@ -75,6 +75,7 @@ module.exports = function (passport, app) {
 
                             newUser.firstname = req.body.firstname;
                             newUser.lastname = req.body.lastname;
+                            newUser.name = req.body.firstname + " "+ req.body.lastname;
                             newUser.email = email;
 
                             newUser.username = req.body.username;
