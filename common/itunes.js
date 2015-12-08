@@ -289,6 +289,7 @@ function callOMDBActor(res, body) {
 
 function callYoutube(res, body, type) {
     var results = body.results || body;
+    if (type != "movieArtist"){
     async.forEachOf(results, function (result, iterator, successYoutubeCallback) {
         var url;
         if (results[iterator].trackName !== undefined) {
@@ -440,7 +441,11 @@ function callYoutube(res, body, type) {
     }, function (error) {
         body.results = results;
         res.status(200).send(body);
-    })
+    })}
+    else {
+        body.results = results;
+        res.status(200).send(body);
+    }
 }
 
 function successCallback(res, body) {
