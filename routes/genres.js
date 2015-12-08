@@ -8,8 +8,11 @@ exports.getTvShowsGenres = function (req, res) {
     getGenresInCache(req, res, '32');
 };
 
-exports.cache = function (req, res) {
+exports.cacheMovies = function (req, res) {
     getGenres(req, res, '32', true);
+}
+
+exports.cacheTv = function (req, res) {
     getGenres(req, res, '33', true);
 }
 

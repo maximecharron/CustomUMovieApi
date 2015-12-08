@@ -74,7 +74,8 @@ app.get('/tokenInfo', authentication.isAuthenticated, login.getToken);
 
 app.get('/genres/movies', authentication.isAuthenticated, genres.getMoviesGenres);
 app.get('/genres/tvshows', authentication.isAuthenticated, genres.getTvShowsGenres);
-app.get('/genres/cache', genres.cache);
+app.get('/genres/cache/movies', genres.cacheMovies);
+app.get('/genres/cache/tvshows', genres.cacheTv);
 
 app.get('/search', authentication.isAuthenticated, search.search);
 app.get('/search/actors', authentication.isAuthenticated, search.searchActor);
