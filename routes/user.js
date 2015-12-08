@@ -49,6 +49,7 @@ exports.findById = function (req, res) {
 
 exports.findByName = function (req, res) {
     var name = req.query.q;
+    console.log(name+"\n");
     User.find({
         name: new RegExp(name, 'i')
     }, function (err, users) {
