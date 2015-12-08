@@ -55,6 +55,7 @@ exports.findByName = function (req, res) {
     }, function (err, users) {
         if (!err) {
             if (users) {
+                console.log(users+"\n");
                 var formattedUsers = [];
                 for (var i = 0; i < users.length; i++) {
                     formattedUsers.push(users[i].toDTO(true));
