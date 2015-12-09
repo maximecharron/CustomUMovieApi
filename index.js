@@ -27,7 +27,7 @@ var reviews = require('./routes/reviews.js');
 
 var app = express();
 var corsOptions = {
-    origin: ['http://localhost:8080', 'http://umovie-team01-client.herokuapp.com',]
+    origin: ['http://localhost:8080', 'http://umovie-team01-client.herokuapp.com']
     methods: ['GET', 'PUT', 'POST', 'PATCH', 'DELETE', 'UPDATE'],
     credentials: true
 };
