@@ -5,6 +5,7 @@ var moment = require('moment');
 var jwt = require('jwt-simple');
 var  FACEBOOK_SECRET = '261ad1a5ff2a723b295f329dd97bb09d';
 var  GOOGLE_SECRET =  'jJw1sxBOFvaMF66zb1RuSiuu';
+var local_FACEBOOK_SECRET = 'aa21704d3b854ef4c9666992523da3af';
 var tokenSecret = 'UBEAT_TOKEN_SECRET' || process.env.TOKEN_SECRET;
 
 var authentication = require('../middleware/authentication');
@@ -139,12 +140,18 @@ exports.facebook = function(req, res) {
     var fields = ['id', 'email', 'first_name', 'last_name', 'link', 'name'];
     var accessTokenUrl = 'https://graph.facebook.com/v2.5/oauth/access_token';
     var graphApiUrl = 'https://graph.facebook.com/v2.5/me?fields=' + fields.join(',');
+    var token = FACEBOOK_SECRET;
+    if (req.get('origin').indexOf('localhost')!= -1){
+        token = local_FACEBOOK_SECRET;
+    }
     var params = {
         code: req.body.code,
         client_id: req.body.clientId,
-        client_secret: FACEBOOK_SECRET,
+        client_secret: token,
         redirect_uri: req.body.redirectUri
     };
+
+
 
     // Step 1. Exchange authorization code for access token.
     request.get({ url: accessTokenUrl, qs: params, json: true }, function(err, response, accessToken) {
