@@ -34,3 +34,7 @@ exports.getTvShowEpisodes = function (req, res) {
         entity: 'tvEpisode'
     }, res, 'many');
 };
+
+exports.getTvEpisodesVideos = function(req, res){
+  itunes.tvEpisodeDetail(req, res);
+};

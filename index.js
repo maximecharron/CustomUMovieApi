@@ -103,6 +103,7 @@ app.get('/similar/movies/:id', authentication.isAuthenticated, home.getSimilarMo
 app.get('/similar/tvshows/:id', authentication.isAuthenticated, home.getSimilarTvshows);
 app.post('/movies/reviews', authentication.isAuthenticated, reviews.addMovieReviews);
 app.post('/tvshows/reviews', authentication.isAuthenticated, reviews.addTvReviews);
+app.get('/tv/:id/season/:seasonNumber/episode/:episodeNumber', lookup.getTvEpisodesVideos);
 
 
 app.get('/watchlists', authentication.isAuthenticated, watchlist.getWatchlists);

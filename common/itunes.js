@@ -26,6 +26,58 @@ exports.lookup = function (parameters, res, amount) {
     }
 };
 
+exports.tvEpisodeDetail = function (req, res){
+ var url = omdbEndPoint+ "tv/" + req.params.id + "/season/" + req.params.seasonNumber + "/episode/"+ req.params.episodeNumber + "?" + qs.stringify({
+         api_key: omdbApiKey,
+         append_to_response: "videos"
+     });
+    var results;
+    console.log(url);
+    request({
+            uri: url,
+            method: 'GET'
+        },
+        function (error, response, body) {
+            if (!error && response.statusCode === 200) {
+                results = JSON.parse(body);
+                console.log(body);
+                var videos = results.videos.results;
+                if (videos && videos.length!=0){
+                    results.previewUrl = "https://www.youtube.com/watch?v=" + videos[0].key;
+                    res.status(200).send(results);
+                }
+                else {
+                    var urlYoutube = youtubeEndPoint + qs.stringify({
+                            q: results.name + " Trailer",
+                            key: youtubeKey
+                        });
+                    request({
+                            uri: urlYoutube,
+                            method: 'GET'
+                        },
+                        function (error, response, body) {
+                            if (!error && response.statusCode === 200) {
+                                results.previewUrl = "https://www.youtube.com/watch?v=" + JSON.parse(body).items[0].id.videoId;
+                                res.status(200).send(results);
+                            } else {
+                                console.log("Failed to get video for " + results.name);
+                                res.send(500);
+                            }
+                        }
+                    );
+                }
+
+
+
+
+            } else {
+                console.log(error);
+                res.send(500);
+            }
+        }
+    );
+}
+
 exports.popular = function (res, type) {
     queryOmdbPopular(res, type);
 };
@@ -409,7 +461,7 @@ function callYoutube(res, body, type) {
                     OMDBTvShow.find({"title": omdbSearchTitle[1]}, function (err, omdbmovie) {
                         if (omdbmovie[0] != undefined) {
                             results[iterator].omdbId = omdbmovie[0]._id;
-                            results[iterator].poster_path = imageEndPoint+omdbmovie[0].seasons[omdbSearchTitle[3]];
+                            results[iterator].poster_path = imageEndPoint+omdbmovie[0].seasons[omdbSearchTitle[3]].poster_path;
                         }
 
                     });
