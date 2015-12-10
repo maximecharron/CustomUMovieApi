@@ -344,7 +344,7 @@ function callYoutube(res, body, type) {
     if (type != "movieArtist"){
     async.forEachOf(results, function (result, iterator, successYoutubeCallback) {
         var url;
-        if (results[iterator].trackName !== undefined) {
+        if (results[iterator].trackName !== undefined && type != "tvEpisode") {
             var regex = new RegExp("(.*){1}(\(\d*\)){1,}");
             var omdbSearchTitle = regex.exec(results[iterator].trackName);
             if (!results[iterator].omdbId) {
@@ -450,10 +450,17 @@ function callYoutube(res, body, type) {
             }
 
         } else {
-            url = youtubeEndPoint + qs.stringify({
-                    q: results[iterator].collectionName + " Trailer",
-                    key: youtubeKey
-                });
+            if (type == "tvEpisode"){
+                url = youtubeEndPoint + qs.stringify({
+                        q: results[iterator].collectionName + " "+ results[iterator].trackName +" Trailer",
+                        key: youtubeKey
+                    });
+            } else {
+                url = youtubeEndPoint + qs.stringify({
+                        q: results[iterator].collectionName + " Trailer",
+                        key: youtubeKey
+                    });
+            }
             var regex = new RegExp("(.*){1}(, Season ([0-9]{1,2}){1}.*){1}", "g");
             var omdbSearchTitle = regex.exec(results[iterator].collectionName);
             async.waterfall([function (successMongoCallback) {
