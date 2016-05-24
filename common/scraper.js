@@ -147,11 +147,11 @@ var scrapeTvshows = function (i) {
 
 
 exports.scrapeMovies = function (req, res) {
-    scrapeMovies(188089);
+    scrapeMovies(364000);
     res.status(200).send("Scraping started.")
 };
 
 exports.scrapeTvShows = function (req, res) {
-    scrapeTvshows(943);
+    scrapeTvshows(65000);
     res.status(200).send("Scraping started.")
 };
