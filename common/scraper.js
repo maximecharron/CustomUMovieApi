@@ -8,7 +8,7 @@ var OMDBTvShow = require('../models/omdbTvShow').model;
 var OMDBSeason = require('../models/omdbSeason').model;
 
 var scrapeMovies = function (i) {
-    if (i >= 365000) {
+    if (i >= 600000) {
         return;
     }
     var crawler = new Crawler().configure({depth: 0});
@@ -69,7 +69,7 @@ var scrapeMovies = function (i) {
 }
 
 var scrapeTvshows = function (i) {
-    if (i >= 65000) {
+    if (i >= 100000) {
         return;
     }
     var crawler = new Crawler().configure({depth: 0});
