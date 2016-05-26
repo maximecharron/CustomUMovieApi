@@ -468,7 +468,9 @@ function callYoutube(res, body, type) {
                     OMDBTvShow.find({"title": omdbSearchTitle[1]}, function (err, omdbmovie) {
                         if (omdbmovie[0] != undefined) {
                             results[iterator].omdbId = omdbmovie[0]._id;
-                            results[iterator].poster_path = imageEndPoint+omdbmovie[0].seasons[omdbSearchTitle[3]].poster_path;
+                            if (omdbmovie[0].seasons[omdbSearchTitle[3]] != undefined){
+                                results[iterator].poster_path = imageEndPoint+omdbmovie[0].seasons[omdbSearchTitle[3]].poster_path;
+                            }
                         }
 
                     });
