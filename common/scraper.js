@@ -88,10 +88,12 @@ var scrapeTvshows = function (i) {
                         });
                     }
                     for (var i = 0; i < content.seasons.length; i++){
-                        seasons[i] = new OMDBSeason({
-                            id: content.seasons[i].season_number,
-                            poster_path : content.seasons[i].poster_path
-                        })
+                        if (content.seasons[i]){
+                            seasons[i] = new OMDBSeason({
+                                id: content.seasons[i].season_number,
+                                poster_path : content.seasons[i].poster_path
+                            })
+                        }
                     }
                     var tvShow = new OMDBTvShow({
                         _id: content.id,
@@ -115,10 +117,12 @@ var scrapeTvshows = function (i) {
                         });
                     }
                     for (var i = 0; i < content.seasons.length; i++){
-                        seasons[i] = new OMDBSeason({
-                            id: content.seasons[i].season_number,
-                            poster_path : content.seasons[i].poster_path
-                        })
+                        if (content.seasons[i]){
+                            seasons[i] = new OMDBSeason({
+                                id: content.seasons[i].season_number,
+                                poster_path : content.seasons[i].poster_path
+                            })
+                        }
                     }
                     dbTvShow.seasons = seasons;
                     dbTvShow.videos = videos;
