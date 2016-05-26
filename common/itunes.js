@@ -429,7 +429,7 @@ function callYoutube(res, body, type) {
                                 results[iterator].previewUrl = "https://www.youtube.com/watch?v=" + omdbmovie[0].videos[video]._id;
                             }
                         }
-                        if (results[iterator].previewUrl.indexOf("youtube") == -1){
+                        if (results[iterator].previewUrl != undefined && results[iterator].previewUrl.indexOf("youtube") == -1){
                             request({
                                     uri: url,
                                     method: 'GET'
