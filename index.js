@@ -43,7 +43,7 @@ function onError(err, req, res, next) {
 }
 
 // The request handler must be the first item
-app.use(raven.middleware.express.requestHandler('https://290295fdb4c442be80614c75ac4f9bfd@app.getsentry.com/82010'));
+app.use(raven.middleware.express.requestHandler('https://290295fdb4c442be80614c75ac4f9bfd:63bde0d4bc7d44c08f212d03d3b442a7@app.getsentry.com/82010'));
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -65,7 +65,7 @@ app.use(flash());
 app.use(cors(corsOptions));
 
 // The error handler must be before any other error middleware
-app.use(raven.middleware.express.errorHandler('https://290295fdb4c442be80614c75ac4f9bfd@app.getsentry.com/82010'));
+app.use(raven.middleware.express.errorHandler('https://290295fdb4c442be80614c75ac4f9bfd:63bde0d4bc7d44c08f212d03d3b442a7@app.getsentry.com/82010'));
 
 // Optional fallthrough error handler
 app.use(onError);
