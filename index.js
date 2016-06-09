@@ -1,4 +1,5 @@
 require('newrelic');
+var raven = require('raven');
 var express = require('express');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
@@ -34,6 +35,16 @@ var corsOptions = {
 
 var tokenSecret = 'UBEAT_TOKEN_SECRET' || process.env.TOKEN_SECRET;
 
+function onError(err, req, res, next) {
+    // The error id is attached to `res.sentry` to be returned
+    // and optionally displayed to the user for support.
+    res.statusCode = 500;
+    res.end(res.sentry+'\n');
+}
+
+// The request handler must be the first item
+app.use(raven.middleware.express.requestHandler('{{ SENTRY_DSN }}'));
+
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 app.set('jwtTokenSecret', tokenSecret);
@@ -52,6 +63,16 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 app.use(cors(corsOptions));
+
+// The error handler must be before any other error middleware
+app.use(raven.middleware.express.errorHandler('{{ SENTRY_DSN }}'));
+
+// Optional fallthrough error handler
+app.use(onError);
+
+app.get('/errortest', function mainHandler(req, res) {
+    throw new Error('Broke!');
+});
 
 app.get('/scrape/movies', scraper.scrapeMovies);
 app.get('/scrape/tvshows', scraper.scrapeTvShows);
