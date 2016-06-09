@@ -43,7 +43,7 @@ function onError(err, req, res, next) {
 }
 
 // The request handler must be the first item
-app.use(raven.middleware.express.requestHandler('{{ SENTRY_DSN }}'));
+app.use(raven.middleware.express.requestHandler('https://290295fdb4c442be80614c75ac4f9bfd@app.getsentry.com/82010'));
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -65,7 +65,7 @@ app.use(flash());
 app.use(cors(corsOptions));
 
 // The error handler must be before any other error middleware
-app.use(raven.middleware.express.errorHandler('{{ SENTRY_DSN }}'));
+app.use(raven.middleware.express.errorHandler('https://290295fdb4c442be80614c75ac4f9bfd@app.getsentry.com/82010'));
 
 // Optional fallthrough error handler
 app.use(onError);
